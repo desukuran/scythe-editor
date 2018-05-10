@@ -44,26 +44,21 @@ namespace scythe
             if (isPopulatingList)
                 return;
 
-#if false
+
             if (treeView1.SelectedNode.Parent == null)
-            {
                 valueTextBox.Text = xmlnode[0].SelectSingleNode(treeView1.SelectedNode.Text).InnerText;
-            }
             else
             {
                 //string path = ".\\" + treeView1.SelectedNode.FullPath;
-                string path = treeView1.SelectedNode.Parent.Text + "/" + treeView1.SelectedNode.Text;
-                XmlNodeList tmplst = xmlnode[0].SelectNodes(path);
+                string path = treeView1.SelectedNode.FullPath.ToString();
+                path = path.Replace("\\", "/");
 
-                //This is ugly
-                if (tmplst.Count > 1)
-                    valueTextBox.Text = tmplst[treeView1.SelectedNode.Index].ChildNodes[0].InnerText;
-                else
-                    valueTextBox.Text = tmplst[0].ChildNodes[0].InnerText;
+                XmlNodeList tmplist = xmlnode[0].SelectNodes(path);
+
+                
+                valueTextBox.Text = tmplist[treeView1.SelectedNode.Index].InnerText;
                 
             }
-
-#endif
 
         }
 
@@ -81,10 +76,13 @@ namespace scythe
                 //If we have child Nodes, populate some more.
                 if (xmlnode[0].ChildNodes[i].ChildNodes.Count > 1)
                 {
+                    //Select the node, which will be carried through the deeper loop
                     treeView1.SelectedNode = workingNode;
 
+                    //Cut into the child nodes and make root the children
                     XmlNodeList tmpNodes = xmlnode[0].ChildNodes[i].ChildNodes;
 
+                    //Start deeper loop
                     PopulateDeeper(workingNode, tmpNodes);
 
                 }
@@ -94,14 +92,22 @@ namespace scythe
 
         private void PopulateDeeper(TreeNode workTreeNode, XmlNodeList workNode)
         {
-            //treeView1.SelectedNode = workTreeNode;
-
+            //Save current tree position before we dive deeper
+            TreeNode firstTree = workTreeNode;
+            
+            //All children nodes process
             for (int i=0; i < workNode.Count; i++)
             { 
+                //Reset position back to the first tree (after all sub-children are done)
+                treeView1.SelectedNode = firstTree;
+                
+                //Add children
                 workTreeNode = treeView1.SelectedNode.Nodes.Add(workNode[i].Name);
 
+                //If there are even more children, go DEEPER
                 if (workNode[i].ChildNodes.Count > 1)
                 {
+                    //Dig deeper
                     XmlNodeList tmp = workNode[0].ChildNodes;
                     PopulateDeeper(workTreeNode, tmp);
                 }
