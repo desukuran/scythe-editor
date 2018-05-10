@@ -31,7 +31,6 @@ namespace scythe
                 treeView1.Nodes.Clear();
                 doc = new XmlDocument();
                 doc.Load(openFileDialog1.FileName);
-                loadedSaveData = doc.InnerXml;
 
                 string str = null;
 
@@ -83,14 +82,9 @@ namespace scythe
             }
             else
             {
-                for (int i = 0; i <= xmlnode[0].ChildNodes.Count - 1; i++)
-                {
-                    if (xmlnode[0].ChildNodes.Item(i).Name == treeView1.SelectedNode.Text)
-                    {
-                        valueTextBox.Text = xmlnode[0].ChildNodes.Item(i).InnerXml.Trim();
-                        break;
-                    }
-                }
+                //string path = ".\\" + treeView1.SelectedNode.FullPath;
+                string path = treeView1.SelectedNode.Parent.Text +"/"+ treeView1.SelectedNode.Text;
+                valueTextBox.Text = xmlnode[0].SelectSingleNode(path).InnerText.Trim();
             }
 
 
