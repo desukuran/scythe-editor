@@ -24,39 +24,14 @@ namespace scythe
             openFileDialog1.Filter = "Save Files|*.*";
             openFileDialog1.Title = "Select a Save File";
 
-
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                isPopulatingList = true;
                 treeView1.Nodes.Clear();
                 doc = new XmlDocument();
                 doc.Load(openFileDialog1.FileName);
-
-                string str = null;
-
-                xmlnode = doc.GetElementsByTagName("player");
-                for (int i = 0; i <= xmlnode[0].ChildNodes.Count - 1; i++)
-                {
-                    //Get player name
-                    if (xmlnode[0].ChildNodes.Item(i).Name == "name")
-                    {
-                        playerNameTextBox.Text = xmlnode[0].ChildNodes.Item(i).InnerText.Trim();
-                    }
-
-                    TreeNode workingNode = treeView1.Nodes.Add(xmlnode[0].ChildNodes.Item(i).Name);
-                    treeView1.SelectedNode = workingNode;
-
-                    if (xmlnode[0].ChildNodes[i].ChildNodes.Count > 1)
-                    {
-                        for (int o = 0; o < xmlnode[0].ChildNodes[i].ChildNodes.Count; o++)
-                            workingNode = treeView1.SelectedNode.Nodes.Add(xmlnode[0].ChildNodes[i].ChildNodes.Item(o).Name);
-
-                    }
-                }
-
+                PopulateList();
             }
 
-            isPopulatingList = false;
             treeView1.SelectedNode = treeView1.Nodes[0];
 
         }
@@ -69,25 +44,69 @@ namespace scythe
             if (isPopulatingList)
                 return;
 
+#if false
             if (treeView1.SelectedNode.Parent == null)
             {
-                for (int i = 0; i <= xmlnode[0].ChildNodes.Count - 1; i++)
-                {
-                    if (xmlnode[0].ChildNodes.Item(i).Name == treeView1.SelectedNode.Text)
-                    {
-                        valueTextBox.Text = xmlnode[0].ChildNodes.Item(i).InnerXml.Trim();
-                        break;
-                    }
-                }
+                valueTextBox.Text = xmlnode[0].SelectSingleNode(treeView1.SelectedNode.Text).InnerText;
             }
             else
             {
                 //string path = ".\\" + treeView1.SelectedNode.FullPath;
-                string path = treeView1.SelectedNode.Parent.Text +"/"+ treeView1.SelectedNode.Text;
-                valueTextBox.Text = xmlnode[0].SelectSingleNode(path).InnerText.Trim();
+                string path = treeView1.SelectedNode.Parent.Text + "/" + treeView1.SelectedNode.Text;
+                XmlNodeList tmplst = xmlnode[0].SelectNodes(path);
+
+                //This is ugly
+                if (tmplst.Count > 1)
+                    valueTextBox.Text = tmplst[treeView1.SelectedNode.Index].ChildNodes[0].InnerText;
+                else
+                    valueTextBox.Text = tmplst[0].ChildNodes[0].InnerText;
+                
             }
 
+#endif
 
+        }
+
+        private void PopulateList()
+        {
+            isPopulatingList = true;
+
+            //Get Player stuff for now
+            xmlnode = doc.GetElementsByTagName("player");
+
+            for (int i = 0; i <= xmlnode[0].ChildNodes.Count - 1; i++)
+            {
+                TreeNode workingNode = treeView1.Nodes.Add(xmlnode[0].ChildNodes[i].Name);
+
+                //If we have child Nodes, populate some more.
+                if (xmlnode[0].ChildNodes[i].ChildNodes.Count > 1)
+                {
+                    treeView1.SelectedNode = workingNode;
+
+                    XmlNodeList tmpNodes = xmlnode[0].ChildNodes[i].ChildNodes;
+
+                    PopulateDeeper(workingNode, tmpNodes);
+
+                }
+            }
+            isPopulatingList = false;
+        }
+
+        private void PopulateDeeper(TreeNode workTreeNode, XmlNodeList workNode)
+        {
+            //treeView1.SelectedNode = workTreeNode;
+
+            for (int i=0; i < workNode.Count; i++)
+            { 
+                workTreeNode = treeView1.SelectedNode.Nodes.Add(workNode[i].Name);
+
+                if (workNode[i].ChildNodes.Count > 1)
+                {
+                    XmlNodeList tmp = workNode[0].ChildNodes;
+                    PopulateDeeper(workTreeNode, tmp);
+                }
+
+            }
         }
 
         public XmlNodeList xmlnode;
