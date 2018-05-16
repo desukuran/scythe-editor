@@ -29,7 +29,9 @@ namespace scythe
                 treeView1.Nodes.Clear();
                 doc = new XmlDocument();
                 doc.Load(openFileDialog1.FileName);
-                PopulateList();
+                Player player = new Player();
+                player.playerName = doc.GetElementById("player");
+                MessageBox.Show(player.playerName.InnerText);
             }
 
             treeView1.SelectedNode = treeView1.Nodes[0];

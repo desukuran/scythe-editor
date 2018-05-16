@@ -108,6 +108,13 @@
 
         private System.Windows.Forms.Button button1;
 
+
+
+
+
+
+
+
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox playerNameTextBox;
         private System.Windows.Forms.TreeView treeView1;
